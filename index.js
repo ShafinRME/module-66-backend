@@ -26,7 +26,12 @@ async function run() {
         const orderCollection = client.db('geniusCar').collection('order');
 
         // AUTH
-        app.get('/login', (req, res) => {
+        app.post('/login', (req, res) => {
+            const user = req.body;
+            const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+                expiresIn: '1d'
+            });
+            res.send({ accessToken });
 
         })
 
