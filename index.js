@@ -24,8 +24,9 @@ function verufyJWT(req, res, next) {
             return res.status(403).send({ message: 'Forbidden Accesss' });
         }
         req.decoded = decoded;
+        next();
     })
-    next();
+
 }
 
 
