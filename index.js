@@ -13,6 +13,21 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+function verufyJWT(req, res, next) {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+        return res.status(401).send({ message: 'unauthorized access' });
+    }
+    const token = authHeader.split(' ')[1];
+    jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, (err, decoded) => {
+        if (err) {
+            return res.status(403).send({ message: 'Forbidden Accesss' });
+        }
+        req.decoded = decoded;
+    })
+    next();
+}
+
 
 
 
@@ -64,12 +79,20 @@ async function run() {
             res.send(result);
         });
         // Order collection API
-        app.get('/order', async (req, res) => {
+        app.get('/order', verufyJWT, async (req, res) => {
+            const decodedEmail = req.decoded.email;
             const email = req.query.email;
-            const query = { email: email };
-            const cursor = orderCollection.find(query);
-            const orders = await cursor.toArray();
-            res.send(orders);
+            if (email === decodedEmail) {
+                const query = { email: email };
+                const cursor = orderCollection.find(query);
+                const orders = await cursor.toArray();
+                res.send(orders);
+            }
+            else {
+                res.status(403).send({ message: 'forbidden access' })
+            }
+
+
         })
 
 
