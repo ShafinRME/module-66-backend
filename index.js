@@ -1,6 +1,7 @@
 const express = require('express');
 const { MongoClient, ServerApiVersion, ObjectId } = require('mongodb');
 const cors = require('cors');
+const jwt = require('jsonwebtoken');
 const { query } = require('express');
 require('dotenv').config();
 const port = process.env.PORT || 5000;
@@ -23,6 +24,13 @@ async function run() {
         await client.connect();
         const serviceCollection = client.db('geniusCar').collection('service');
         const orderCollection = client.db('geniusCar').collection('order');
+
+        // AUTH
+        app.get('/login', (req, res) => {
+
+        })
+
+        // Services API
         app.get('/service', async (req, res) => {
             const query = {};
             const cursor = serviceCollection.find(query);
@@ -51,6 +59,15 @@ async function run() {
             res.send(result);
         });
         // Order collection API
+        app.get('/order', async (req, res) => {
+            const email = req.query.email;
+            const query = { email: email };
+            const cursor = orderCollection.find(query);
+            const orders = await cursor.toArray();
+            res.send(orders);
+        })
+
+
         app.post('/order', async (req, res) => {
             const order = req.body;
             const result = await orderCollection.insertOne(order);
